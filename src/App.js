@@ -160,7 +160,7 @@ function App() {
                 <Card.Img variant="top" src={egyp} style={{ height: '300px', objectFit: 'cover' }} />
                 <Card.Body>
                   <Card.Title>Époque Égyptienne</Card.Title>
-                  <Card.Text>Partez à la découverte de l'Égypte des pharaons, un monde de mystères et de majesté.</Card.Text>
+                  <Card.Text>Découvrez l'Égypte des pharaons, un monde de mystères et de majesté.</Card.Text>
                   <button onClick={() => handleShow('Époque Égyptienne')} className="btn" style={{
                     backgroundColor: '#6f4f37',
                     color: '#fff',
