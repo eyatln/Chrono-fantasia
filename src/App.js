@@ -1,11 +1,7 @@
 import React, { useState } from 'react';
 import 'bootstrap/dist/css/bootstrap.min.css';
-import Container from 'react-bootstrap/Container';
-import Nav from 'react-bootstrap/Nav';
-import Navbar from 'react-bootstrap/Navbar';
-import Card from 'react-bootstrap/Card';
-import Carousel from 'react-bootstrap/Carousel';
-import Modal from 'react-bootstrap/Modal'; 
+import { Container, Nav, Navbar, Card, Carousel, Modal, Toast, ToastContainer } from 'react-bootstrap';
+import { useNavigate } from 'react-router-dom';  // Utiliser le hook de navigation
 import logo from './assets/logo.png'; 
 import backgroundImage from './assets/background.png'; 
 import vict from './assets/victo.png';
@@ -15,40 +11,40 @@ import ange from './assets/ange.png';
 function App() {
   const [showModal, setShowModal] = useState(false);
   const [modalContent, setModalContent] = useState('');
-  const [selectedTimeSlot, setSelectedTimeSlot] = useState(null);  // L'état du créneau sélectionné
+  const [selectedTimeSlot, setSelectedTimeSlot] = useState(null); 
+  const [showToast, setShowToast] = useState(false); // Ajouter un état pour contrôler le toast
 
   const timeSlots = [
     { time: '10h-12h', availableSeats: 6 },
     { time: '13h-15h', availableSeats: 3 },
     { time: '16h-18h', availableSeats: 10 },
     { time: '19h-21h', availableSeats: 5 },
-  
   ];
 
-  // Fonction pour ouvrir le modal avec un contenu spécifique
+  const navigate = useNavigate();  // Utiliser le hook de navigation
+
   const handleShow = (content) => {
     setModalContent(content);
     setShowModal(true);
-    setSelectedTimeSlot(null); // Réinitialiser le créneau sélectionné lorsque le modal s'ouvre
+    setSelectedTimeSlot(null); // Réinitialiser la sélection à chaque ouverture du modal
   };
 
-  // Fonction pour fermer le modal
   const handleClose = () => setShowModal(false);
 
-  // Fonction pour sélectionner un créneau horaire
   const handleTimeSlotSelection = (slot) => {
-    setSelectedTimeSlot(slot);  // Mettre à jour l'état avec le créneau sélectionné
+    setSelectedTimeSlot(slot.time); // Sauvegarder uniquement l'heure du créneau sélectionné
   };
 
-  // Fonction de réservation
   const handleReserve = () => {
     if (selectedTimeSlot) {
-      alert(`Réservation confirmée pour le créneau ${selectedTimeSlot.time}. Places restantes : ${selectedTimeSlot.availableSeats - 1}`);
-      setShowModal(false); // Fermer le modal après la réservation
+      // Redirect to payment page with selected era and time slot
+      navigate('/payment', { state: { selectedTimeSlot, selectedEra: modalContent } });
     } else {
-      alert('Veuillez sélectionner un créneau horaire.');
+      // Show toast if no time slot is selected
+      setShowToast(true);
     }
   };
+  
 
   return (
     <div className="App">
@@ -99,23 +95,10 @@ function App() {
         </Carousel.Item>
       </Carousel>
 
-      <p style={{
-        textAlign: 'center',
-        fontSize: '18px',
-        color: '#6f4f37',
-        fontWeight: 'bold',
-        backgroundColor: '#f8f8f8',
-        padding: '3px',
-        borderRadius: '8px',
-      }}>
-        Ouvert de 10h à 21h
-      </p>
-
       {/* Section avec les cartes */}
       <div style={{ backgroundImage: `url(${backgroundImage})`, backgroundSize: 'cover', backgroundPosition: 'center center', backgroundRepeat: 'no-repeat', minHeight: '100vh', paddingTop: '150px', backgroundColor: '#f0f0f0' }}>
         <Container>
           <div className="row">
-            {/* Card pour l'Époque Victorienne */}
             <div className="col-md-4 mb-4">
               <Card>
                 <Card.Img variant="top" src={vict} style={{ height: '300px', objectFit: 'cover' }} />
@@ -135,7 +118,6 @@ function App() {
                 </Card.Body>
               </Card>
             </div>
-            {/* Autres cartes */}
             <div className="col-md-4 mb-4">
               <Card>
                 <Card.Img variant="top" src={ange} style={{ height: '300px', objectFit: 'cover' }} />
@@ -188,21 +170,22 @@ function App() {
           <div className="d-flex flex-wrap justify-content-around">
             {timeSlots.map((slot, index) => (
               <div 
-                key={index}
+                key={index} 
                 onClick={() => handleTimeSlotSelection(slot)} 
                 style={{
                   width: '120px',
                   margin: '10px',
                   padding: '10px',
                   borderRadius: '5px',
-                  backgroundColor: selectedTimeSlot === slot ? '#6f4f37' : '#f8f9fa',
-                  color: selectedTimeSlot === slot ? '#fff' : '#000',
+                  backgroundColor: selectedTimeSlot === slot.time ? '#6f4f37' : '#f8f9fa',  // Appliquer la couleur en fonction de la sélection
+                  color: selectedTimeSlot === slot.time ? '#fff' : '#000',
                   border: '1px solid #ccc',
                   cursor: 'pointer',
                   textAlign: 'center',
-                  boxShadow: selectedTimeSlot === slot ? '0 0 10px rgba(0,0,0,0.2)' : 'none',
+                  boxShadow: selectedTimeSlot === slot.time ? '0 0 10px rgba(0,0,0,0.2)' : 'none',
                   transition: 'background-color 0.3s ease, color 0.3s ease',
-                }}>
+                }}
+              >
                 <h6>{slot.time}</h6>
                 <p>{slot.availableSeats} places restantes</p>
               </div>
@@ -221,10 +204,28 @@ function App() {
             }}>Réserver</button>
           </div>
         </Modal.Body>
-        <Modal.Footer>
-          <button variant="secondary" onClick={handleClose}>Fermer</button>
-        </Modal.Footer>
       </Modal>
+
+      {/* Toast */}
+      <ToastContainer
+        position="bottom-end" 
+        className="p-3"
+      >
+        <Toast
+          show={showToast}
+          onClose={() => setShowToast(false)}
+          delay={3000}
+          autohide
+          bg="danger"
+          style={{
+            marginTop: '10px',
+            zIndex: 9999,
+          }}
+        >
+          <Toast.Body>Veuillez sélectionner un créneau horaire.</Toast.Body>
+        </Toast>
+      </ToastContainer>
+
 
       {/* Footer */}
       <footer style={{ backgroundColor: '#333', color: '#fff', padding: '10px 0', textAlign: 'center' }}>
